@@ -1,0 +1,16 @@
+app:
+  name: UP Infer
+
+# Paths may be absolute, project-relative, or an Ultralytics model name.
+# Ultralytics downloads named models the first time they are selected.
+models:
+  - id: yolo11n
+    name: YOLO 11 Nano Detection
+    path: yolo11n.pt
+  - id: yolo11n-seg
+    name: YOLO 11 Nano Segmentation
+    path: yolo11n-seg.pt
+
+upload:
+  max_files: 20
+  max_mb: 15

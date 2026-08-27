@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Upload and infer images with YOLO models.">
+  <title>UP Infer</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="UP Infer home">
+      <span class="fish" aria-hidden="true"><span></span></span>
+      <span><strong>UP Infer</strong><small>Upload &amp; infer images</small></span>
+    </a>
+    <span class="status"><i></i> Ready for a school of images</span>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p class="eyebrow">COMPUTER VISION WORKBENCH</p>
+      <h1>See what your model sees.</h1>
+      <p>Choose a YOLO model, focus its labels, and inspect predictions across one image or many.</p>
+    </section>
+
+    <form id="infer-form" class="workspace">
+      <section class="panel setup-panel">
+        <div class="section-title">
+          <span class="step">01</span>
+          <div><h2>Choose a model</h2><p>Models are loaded from <code>config/config.yaml</code>.</p></div>
+        </div>
+        <label class="field-label" for="model">Model</label>
+        <div class="select-wrap">
+          <select id="model" name="model" required disabled><option>Loading models…</option></select>
+        </div>
+        <p id="model-task" class="model-task" aria-live="polite"></p>
+
+        <div class="divider"></div>
+
+        <div class="section-title compact">
+          <span class="step">02</span>
+          <div><h2>Customize results</h2><p>Remove labels you do not want to display.</p></div>
+        </div>
+        <div class="label-heading">
+          <label class="field-label">Visible labels <span id="label-count"></span></label>
+          <button id="restore-labels" class="text-button" type="button">Restore all</button>
+        </div>
+        <div id="labels" class="label-list" aria-live="polite"></div>
+
+        <div class="metrics">
+          <div class="metric">
+            <div class="metric-head">
+              <label for="confidence">Confidence</label>
+              <output id="confidence-value" for="confidence">0.25</output>
+            </div>
+            <input id="confidence" type="range" min="0" max="1" value="0.25" step="0.01">
+          </div>
+          <div class="metric">
+            <div class="metric-head">
+              <label for="iou">IoU</label>
+              <div><output id="iou-value" for="iou">0.70</output><button id="help-open" class="help-button" type="button" aria-label="Explain confidence and IoU">?</button></div>
+            </div>
+            <input id="iou" type="range" min="0" max="1" value="0.70" step="0.01">
+          </div>
+        </div>
+      </section>
+
+      <section class="panel upload-panel">
+        <div class="section-title">
+          <span class="step">03</span>
+          <div><h2>Upload images</h2><p>Select one or several images for the same inference run.</p></div>
+        </div>
+        <label id="drop-zone" class="drop-zone" for="files">
+          <span class="upload-icon" aria-hidden="true">↑</span>
+          <strong>Drop images here</strong>
+          <span>or <u>browse your files</u></span>
+          <small>PNG, JPG, WEBP · up to 20 images</small>
+        </label>
+        <input id="files" class="visually-hidden" type="file" accept="image/png,image/jpeg,image/webp" multiple required>
+        <div id="file-list" class="file-list" aria-live="polite"></div>
+        <button id="run-button" class="run-button" type="submit" disabled>
+          <span>Run inference</span><b aria-hidden="true">→</b>
+        </button>
+        <p id="form-message" class="form-message" role="status"></p>
+      </section>
+    </form>
+
+    <section id="results" class="results" hidden>
+      <div class="results-head">
+        <div><p class="eyebrow">INFERENCE OUTPUT</p><h2 id="results-title">Results</h2></div>
+        <label class="columns">Columns
+          <select id="columns"><option>2</option><option>3</option><option>4</option><option>5</option></select>
+        </label>
+      </div>
+      <div id="result-grid" class="result-grid"></div>
+      <nav class="pagination" aria-label="Results pages">
+        <button id="page-prev" type="button">← Previous</button>
+        <span id="page-status"></span>
+        <button id="page-next" type="button">Next →</button>
+      </nav>
+    </section>
+  </main>
+
+  <dialog id="help-dialog">
+    <button id="help-close" class="dialog-close" type="button" aria-label="Close help">×</button>
+    <p class="eyebrow">METRIC GUIDE</p>
+    <h2>Confidence &amp; IoU</h2>
+    <div class="help-copy">
+      <h3>Confidence</h3>
+      <p>The model’s certainty that a detected object belongs to a class. A higher setting hides uncertain predictions; a lower setting shows more possibilities.</p>
+      <h3>Intersection over Union (IoU)</h3>
+      <p>How much two predicted areas may overlap before they are treated as duplicates. A lower setting removes overlapping predictions more aggressively.</p>
+    </div>
+    <button id="help-done" class="run-button" type="button">Got it</button>
+  </dialog>
+
+  <script src="/static/app.js" defer></script>
+</body>
+</html>
