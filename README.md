@@ -9,10 +9,23 @@ The requested virtual environment is `/opt/personal/.personal-venv`.
 ```bash
 cd /opt/personal/up_infer
 /opt/personal/.personal-venv/bin/pip install -r requirements.txt
-/opt/personal/.personal-venv/bin/uvicorn app.main:app --reload
+/opt/personal/.personal-venv/bin/python run.py
 ```
 
 Open <http://127.0.0.1:8000>. API documentation is at <http://127.0.0.1:8000/docs>.
+
+## Configure the server
+
+Edit the `server` section in `config/config.yaml`:
+
+```yaml
+server:
+  domain: 127.0.0.1
+  port: 8000
+  reload: true
+```
+
+Use `127.0.0.1` for local-only access or `0.0.0.0` when serving through a network or public domain. A public domain still needs DNS and, normally, a reverse proxy pointing to this configured port.
 
 ## Configure models
 

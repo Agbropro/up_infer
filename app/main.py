@@ -16,6 +16,7 @@ app.include_router(router)
 home_page = (FRONTEND_DIR / "index.html").read_text(encoding="utf-8")
 style_sheet = (FRONTEND_DIR / "styles.css").read_text(encoding="utf-8")
 browser_code = (FRONTEND_DIR / "app.js").read_text(encoding="utf-8")
+logo_image = (FRONTEND_DIR / "assets" / "nicholas.png").read_bytes()
 
 
 @app.get("/", include_in_schema=False)
@@ -37,6 +38,13 @@ async def show_script() -> Response:
     """Serve the UP Infer browser code."""
 
     return Response(browser_code, media_type="text/javascript")
+
+
+@app.get("/static/assets/nicholas.png", include_in_schema=False)
+async def show_logo() -> Response:
+    """Serve the UP Infer logo."""
+
+    return Response(logo_image, media_type="image/png")
 
 
 @app.get("/health", include_in_schema=False)

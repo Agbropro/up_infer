@@ -8,7 +8,7 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from app.application.config import load_config
 from app.application.infer import run_infer
 from app.application.models import ModelStore
-from app.domain.entities import InferReply, ModelItem
+from app.domain.entities import InferReply, ModelItem, ModelSummary
 
 
 config = load_config()
@@ -19,15 +19,24 @@ max_files = int(limits.get("max_files", 20))
 max_bytes = int(limits.get("max_mb", 15)) * 1024 * 1024
 
 
-@router.get("/models", response_model=list[ModelItem])
-async def list_models() -> list[ModelItem]:
-    """List available models, tasks, and labels."""
+@router.get("/models", response_model=list[ModelSummary])
+async def list_models() -> list[ModelSummary]:
+    """List configured models without loading weights."""
+
+    return store.list_summaries()
+
+
+@router.get("/models/{model_id}", response_model=ModelItem)
+async def get_model(model_id: str) -> ModelItem:
+    """Load one model and return its metadata."""
 
     try:
-        return store.list_items()
+        return store.get_item(model_id)
+    except KeyError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
     except Exception as error:
         raise HTTPException(
-            status_code=503, detail=f"Could not load models: {error}"
+            status_code=503, detail=f"Could not load model: {error}"
         ) from error
 
 

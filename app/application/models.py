@@ -5,7 +5,7 @@ from threading import Lock
 from typing import Any
 
 from app.application.config import ROOT_DIR
-from app.domain.entities import ModelItem
+from app.domain.entities import ModelItem, ModelSummary
 
 
 class ModelStore:
@@ -56,3 +56,11 @@ class ModelStore:
         """Return metadata for every configured model."""
 
         return [self.get_item(model_id) for model_id in self.items]
+
+    def list_summaries(self) -> list[ModelSummary]:
+        """Return configured models without loading weights."""
+
+        return [
+            {"id": model_id, "name": item["name"]}
+            for model_id, item in self.items.items()
+        ]

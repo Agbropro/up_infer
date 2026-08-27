@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Upload and infer images with YOLO models.">
   <title>UP Infer</title>
+  <link rel="icon" type="image/png" href="/static/assets/nicholas.png">
   <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="/" aria-label="UP Infer home">
-      <span class="fish" aria-hidden="true"><span></span></span>
+      <img class="brand-logo" src="/static/assets/nicholas.png" alt="">
       <span><strong>UP Infer</strong><small>Upload &amp; infer images</small></span>
     </a>
     <span class="status"><i></i> Ready for a school of images</span>
@@ -112,6 +113,12 @@
       <p>How much two predicted areas may overlap before they are treated as duplicates. A lower setting removes overlapping predictions more aggressively.</p>
     </div>
     <button id="help-done" class="run-button" type="button">Got it</button>
+  </dialog>
+
+  <dialog id="image-dialog" class="image-dialog">
+    <button id="image-close" class="dialog-close" type="button" aria-label="Close image preview">×</button>
+    <img id="zoomed-image" src="" alt="">
+    <p id="image-caption"></p>
   </dialog>
 
   <script src="/static/app.js" defer></script>

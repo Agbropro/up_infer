@@ -1,5 +1,6 @@
 const state = {
   models: [],
+  details: {},
   labels: [],
   files: [],
   results: [],
@@ -28,20 +29,40 @@ async function loadModels() {
     modelInput.innerHTML = data.map((model) =>
       `<option value="${escapeHtml(model.id)}">${escapeHtml(model.name)}</option>`).join("");
     modelInput.disabled = false;
-    chooseModel();
+    await chooseModel();
   } catch (error) {
     modelInput.innerHTML = "<option>Models unavailable</option>";
     message.textContent = error.message;
   }
 }
 
-function chooseModel() {
-  const model = state.models.find((item) => item.id === modelInput.value);
-  if (!model) return;
-  state.labels = [...model.labels];
-  byId("model-task").textContent = `${model.task} model · ${model.labels.length} labels`;
+async function chooseModel() {
+  const modelId = modelInput.value;
+  if (!modelId) return;
+  state.labels = [];
   renderLabels();
-  updateButton();
+  modelInput.disabled = true;
+  byId("model-task").textContent = "Loading selected model…";
+  try {
+    if (!state.details[modelId]) {
+      const response = await fetch(`/api/models/${encodeURIComponent(modelId)}`);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || "Model could not be loaded");
+      state.details[modelId] = data;
+    }
+    if (modelInput.value !== modelId) return;
+    const model = state.details[modelId];
+    state.labels = [...model.labels];
+    byId("model-task").textContent = `${model.task} model · ${model.labels.length} labels`;
+    message.textContent = "";
+  } catch (error) {
+    byId("model-task").textContent = "Model unavailable";
+    message.textContent = error.message;
+  } finally {
+    modelInput.disabled = false;
+    renderLabels();
+    updateButton();
+  }
 }
 
 function renderLabels() {
@@ -116,14 +137,14 @@ async function submitForm(event) {
 function renderResults() {
   const start = (state.page - 1) * state.perPage;
   const visible = state.results.slice(start, start + state.perPage);
-  byId("result-grid").innerHTML = visible.map((item) => {
+  byId("result-grid").innerHTML = visible.map((item, index) => {
     const scores = item.predictions.length ? item.predictions.map((score) => `
       <div class="score" style="--class-color:${score.color};--score:${score.confidence * 100}%">
         <div><span>${escapeHtml(score.label)}</span><b>${(score.confidence * 100).toFixed(1)}%</b></div>
         <div class="score-bar"><i></i></div>
       </div>`).join("") : '<p class="no-predictions">No selected objects passed the thresholds.</p>';
     return `<article class="result-card">
-      <div class="result-image"><img src="${item.image}" alt="Inferred result for ${escapeHtml(item.name)}"></div>
+      <div class="result-image"><button type="button" data-zoom="${start + index}" aria-label="Zoom inferred result for ${escapeHtml(item.name)}"><img src="${item.image}" alt="Inferred result for ${escapeHtml(item.name)}"></button></div>
       <div class="result-data"><h3 title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</h3><small>${item.width} × ${item.height}</small><div class="score-list">${scores}</div></div>
     </article>`;
   }).join("");
@@ -141,7 +162,7 @@ byId("labels").addEventListener("click", (event) => {
   renderLabels();
 });
 byId("restore-labels").addEventListener("click", () => {
-  const model = state.models.find((item) => item.id === modelInput.value);
+  const model = state.details[modelInput.value];
   state.labels = model ? [...model.labels] : [];
   renderLabels();
 });
@@ -173,6 +194,21 @@ byId("columns").addEventListener("change", (event) => {
 });
 byId("page-prev").addEventListener("click", () => { state.page -= 1; renderResults(); });
 byId("page-next").addEventListener("click", () => { state.page += 1; renderResults(); });
+
+const imageDialog = byId("image-dialog");
+byId("result-grid").addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-zoom]");
+  if (!button) return;
+  const item = state.results[Number(button.dataset.zoom)];
+  byId("zoomed-image").src = item.image;
+  byId("zoomed-image").alt = `Zoomed inferred result for ${item.name}`;
+  byId("image-caption").textContent = `${item.name} · ${item.width} × ${item.height}`;
+  imageDialog.showModal();
+});
+byId("image-close").addEventListener("click", () => imageDialog.close());
+imageDialog.addEventListener("click", (event) => {
+  if (event.target === imageDialog) imageDialog.close();
+});
 
 const dialog = byId("help-dialog");
 byId("help-open").addEventListener("click", () => dialog.showModal());

@@ -1,6 +1,12 @@
 app:
   name: UP Infer
 
+server:
+  # Use 127.0.0.1 for local access or 0.0.0.0 for network/domain access.
+  domain: 127.0.0.1
+  port: 8000
+  reload: true
+
 # Paths may be absolute, project-relative, or an Ultralytics model name.
 # Ultralytics downloads named models the first time they are selected.
 models:
@@ -10,6 +16,9 @@ models:
   - id: yolo11n-seg
     name: YOLO 11 Nano Segmentation
     path: yolo11n-seg.pt
+  - id: parkir 
+    name: parkir
+    path: /opt/model/plat_kendaraan_1_2_1.pt
 
 upload:
   max_files: 20

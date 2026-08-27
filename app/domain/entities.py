@@ -12,6 +12,13 @@ class ModelItem(TypedDict):
     labels: list[str]
 
 
+class ModelSummary(TypedDict):
+    """Describe a configured model before loading it."""
+
+    id: str
+    name: str
+
+
 class ScoreItem(TypedDict):
     """Describe one predicted object."""
 
