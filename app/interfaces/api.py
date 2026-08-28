@@ -60,7 +60,9 @@ async def _send_ticket(
             message = response.json().get("error", {}).get("message")
         except (json.JSONDecodeError, AttributeError, TypeError):
             message = None
-        raise RuntimeError(message or f"Ticket service returned HTTP {response.status_code}")
+        raise RuntimeError(
+            message or f"Ticket service returned HTTP {response.status_code}"
+        )
     return response.json()
 
 
@@ -95,7 +97,9 @@ async def submit_feedback(feedback: FeedbackRequest) -> dict[str, object]:
         "project_name": "up-infer",
         "ticket_type": type_mapping[feedback.ticket_type],
         "content": f"{feedback.title}\n\n{feedback.description}",
-        "metadata": {key: value for key, value in metadata.items() if value is not None},
+        "metadata": {
+            key: value for key, value in metadata.items() if value is not None
+        },
     }
 
     try:

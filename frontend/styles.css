@@ -39,9 +39,9 @@ button, select, label[for], input[type="range"] { cursor: pointer; }
 .status { color: var(--muted); font-size: 13px; }
 .status i { width: 8px; height: 8px; display: inline-block; margin-right: 6px; border-radius: 50%; background: #36b37e; box-shadow: 0 0 0 4px #dff6ed; }
 .topbar-actions { display: flex; align-items: center; gap: 20px; }
-.feedback-open { width: 82px; height: 46px; padding: 5px 8px; display: grid; place-items: center; background: var(--white); border: 1px solid var(--line); border-radius: 11px; box-shadow: 0 5px 16px rgba(16,43,67,.08); transition: .18s ease; }
+.feedback-open { width: 144px; height: 72px; padding: 4px 7px; display: grid; place-items: center; background: var(--white); border: 1px solid var(--line); border-radius: 13px; box-shadow: 0 5px 16px rgba(16,43,67,.08); transition: .18s ease; }
 .feedback-open:hover { transform: translateY(-1px); border-color: #92cbd4; box-shadow: 0 8px 20px rgba(16,43,67,.13); }
-.feedback-open img { width: 64px; height: 32px; display: block; object-fit: contain; image-rendering: pixelated; }
+.feedback-open img { width: 128px; height: 64px; display: block; object-fit: contain; image-rendering: pixelated; }
 
 main { width: min(1440px, calc(100% - 40px)); margin: 0 auto; padding: 70px 0 90px; }
 .hero { max-width: 700px; margin-bottom: 38px; }
@@ -169,6 +169,7 @@ dialog .run-button { margin-top: 14px; }
   .result-data { border-top: 1px solid var(--line); border-left: 0; }
   .topbar { padding-inline: 14px; }
   .topbar-actions { gap: 8px; }
-  .feedback-open { width: 72px; }
+  .feedback-open { width: 108px; height: 58px; }
+  .feedback-open img { width: 96px; height: 48px; }
   .feedback-dialog { padding: 28px 20px; }
 }

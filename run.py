@@ -1,13 +1,15 @@
 """Run UP Infer using values from config.yaml."""
 
 import uvicorn
+from dotenv import load_dotenv
 
-from app.application.config import load_config
+from app.application.config import ROOT_DIR, load_config
 
 
 def start_server() -> None:
     """Start the configured Uvicorn server."""
 
+    load_dotenv(ROOT_DIR / ".env")
     config = load_config()
     server = config.get("server", {})
     domain = str(server.get("domain", "127.0.0.1"))
