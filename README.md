@@ -27,6 +27,21 @@ server:
 
 Use `127.0.0.1` for local-only access or `0.0.0.0` when serving through a network or public domain. A public domain still needs DNS and, normally, a reverse proxy pointing to this configured port.
 
+## Configure GPU memory
+
+The `inference` section controls GPU usage:
+
+```yaml
+inference:
+  batch_size: 1
+  image_size: 640
+  device: auto
+  half: true
+  clear_cache: true
+```
+
+Keep `batch_size: 1` for predictable VRAM usage. Increase it only when throughput matters more than memory. Use `device: cpu` to disable CUDA, or a value such as `cuda:0` to select a GPU. The application keeps model weights cached for fast switching but allows only the most recently inferred model to retain a GPU predictor.
+
 ## Configure models
 
 Edit `config/config.yaml` and add an entry for each Ultralytics-compatible model:

@@ -69,24 +69,41 @@ def run_infer(
 ) -> InferReply:
     """Infer uploaded images with selected labels."""
 
-    model = store.get_model(model_id)
+    model = store.use_model(model_id)
     item = store.get_item(model_id)
     name_map = model.names
-    class_ids = [key for key, value in name_map.items() if value in labels]
-    images = [open_image(data) for _, data in uploads]
-    results = model.predict(
-        images, conf=confidence, iou=iou, classes=class_ids, verbose=False
-    )
+    name_items = name_map.items() if isinstance(name_map, dict) else enumerate(name_map)
+    class_ids = [key for key, value in name_items if value in labels]
+    options = store.options
+    batch_size = max(1, int(options.get("batch_size", 1)))
+    image_size = max(32, int(options.get("image_size", 640)))
+    device = options.get("device", "auto")
+    predict_args = {
+        "conf": confidence,
+        "iou": iou,
+        "classes": class_ids,
+        "imgsz": image_size,
+        "half": bool(options.get("half", False)),
+        "verbose": False,
+    }
+    if device != "auto":
+        predict_args["device"] = device
     output: list[ImageItem] = []
-    for (name, _), image, result in zip(uploads, images, results):
-        plotted = result.plot(conf=True, labels=True, boxes=True, masks=True)
-        output.append(
-            {
-                "name": name,
-                "image": encode_image(plotted),
-                "width": image.width,
-                "height": image.height,
-                "predictions": get_scores(result),
-            }
-        )
+    for start in range(0, len(uploads), batch_size):
+        batch = uploads[start : start + batch_size]
+        images = [open_image(data) for _, data in batch]
+        results = model.predict(images, **predict_args)
+        for (name, _), image, result in zip(batch, images, results):
+            plotted = result.plot(conf=True, labels=True, boxes=True, masks=True)
+            output.append(
+                {
+                    "name": name,
+                    "image": encode_image(plotted),
+                    "width": image.width,
+                    "height": image.height,
+                    "predictions": get_scores(result),
+                }
+            )
+        del results
+        store.clear_cache()
     return {"model": item["name"], "task": item["task"], "images": output}

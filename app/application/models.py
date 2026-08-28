@@ -15,7 +15,9 @@ class ModelStore:
         """Create a model store from validated configuration."""
 
         self.items = {item["id"]: item for item in config["models"]}
+        self.options = config.get("inference", {})
         self.loaded: dict[str, Any] = {}
+        self.active_id: str | None = None
         self.lock = Lock()
 
     def get_model(self, model_id: str) -> Any:
@@ -33,6 +35,34 @@ class ModelStore:
                     path = ROOT_DIR / path
                 self.loaded[model_id] = YOLO(str(path))
         return self.loaded[model_id]
+
+    def use_model(self, model_id: str) -> Any:
+        """Activate one model and release other GPU predictors."""
+
+        model = self.get_model(model_id)
+        if self.active_id == model_id:
+            return model
+        for loaded_id, loaded_model in self.loaded.items():
+            if (
+                loaded_id == model_id
+                or getattr(loaded_model, "predictor", None) is None
+            ):
+                continue
+            loaded_model.predictor = None
+            loaded_model.model.to("cpu")
+        self.active_id = model_id
+        self.clear_cache()
+        return model
+
+    def clear_cache(self) -> None:
+        """Release unused CUDA allocator blocks when configured."""
+
+        if not self.options.get("clear_cache", False):
+            return
+        import torch
+
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
 
     def get_item(self, model_id: str) -> ModelItem:
         """Return metadata for one model."""

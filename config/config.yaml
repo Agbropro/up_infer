@@ -5,7 +5,15 @@ server:
   # Use 127.0.0.1 for local access or 0.0.0.0 for network/domain access.
   domain: 0.0.0.0
   port: 7000
-  reload: true
+  reload: false
+
+inference:
+  # Process small batches to keep GPU memory predictable.
+  batch_size: 1
+  image_size: 640
+  device: auto
+  half: true
+  clear_cache: true
 
 # Paths may be absolute, project-relative, or an Ultralytics model name.
 # Ultralytics downloads named models the first time they are selected.
