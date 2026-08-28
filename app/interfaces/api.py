@@ -1,9 +1,12 @@
 """Expose the UP Infer HTTP API."""
 
 import json
-from typing import Annotated
+import os
+from typing import Annotated, Literal
 
+import httpx
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.application.config import load_config
 from app.application.infer import run_infer
@@ -19,11 +22,87 @@ max_files = int(limits.get("max_files", 20))
 max_bytes = int(limits.get("max_mb", 15)) * 1024 * 1024
 
 
+class FeedbackRequest(BaseModel):
+    """Validate feedback submitted by the browser widget."""
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    ticket_type: Literal["misc", "bug", "feature"]
+    title: str = Field(min_length=3, max_length=160)
+    description: str = Field(min_length=3, max_length=10_000)
+    page_url: str = Field(max_length=2_048)
+    selected_model: str | None = Field(default=None, max_length=100)
+    viewport: str | None = Field(default=None, max_length=50)
+
+
+async def _send_ticket(
+    url: str,
+    api_key: str,
+    payload: dict[str, object],
+) -> dict[str, object]:
+    """Send one ticket without blocking the FastAPI event loop."""
+
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.post(
+                f"{url.rstrip('/')}/api/tickets",
+                json=payload,
+                headers={
+                    "User-Agent": "up-infer/1.0",
+                    "x-api-key": api_key,
+                },
+            )
+    except httpx.RequestError as error:
+        raise RuntimeError("Ticket service could not be reached") from error
+
+    if response.is_error:
+        try:
+            message = response.json().get("error", {}).get("message")
+        except (json.JSONDecodeError, AttributeError, TypeError):
+            message = None
+        raise RuntimeError(message or f"Ticket service returned HTTP {response.status_code}")
+    return response.json()
+
+
 @router.get("/models", response_model=list[ModelSummary])
 async def list_models() -> list[ModelSummary]:
     """List configured models without loading weights."""
 
     return store.list_summaries()
+
+
+@router.post("/feedback", status_code=201)
+async def submit_feedback(feedback: FeedbackRequest) -> dict[str, object]:
+    """Forward browser feedback without exposing the central API key."""
+
+    service_url = os.getenv("TICKET_SERVICE_URL", "https://ticket.agbropro.my.id")
+    api_key = os.getenv("TICKET_SERVICE_API_KEY")
+    if not api_key:
+        raise HTTPException(
+            status_code=503,
+            detail="Feedback service is not configured",
+        )
+
+    type_mapping = {"misc": "general", "bug": "bug", "feature": "feedback"}
+    metadata = {
+        "feedback_type": feedback.ticket_type,
+        "source": "feedback-widget",
+        "page_url": feedback.page_url,
+        "selected_model": feedback.selected_model,
+        "viewport": feedback.viewport,
+    }
+    ticket_payload: dict[str, object] = {
+        "project_name": "up-infer",
+        "ticket_type": type_mapping[feedback.ticket_type],
+        "content": f"{feedback.title}\n\n{feedback.description}",
+        "metadata": {key: value for key, value in metadata.items() if value is not None},
+    }
+
+    try:
+        result = await _send_ticket(service_url, api_key, ticket_payload)
+    except RuntimeError as error:
+        raise HTTPException(status_code=502, detail=str(error)) from error
+    return result
 
 
 @router.get("/models/{model_id}", response_model=ModelItem)

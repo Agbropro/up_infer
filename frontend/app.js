@@ -210,6 +210,60 @@ imageDialog.addEventListener("click", (event) => {
   if (event.target === imageDialog) imageDialog.close();
 });
 
+const feedbackDialog = byId("feedback-dialog");
+const feedbackForm = byId("feedback-form");
+const feedbackSubmit = byId("feedback-submit");
+const feedbackMessage = byId("feedback-message");
+
+byId("feedback-open").addEventListener("click", () => {
+  feedbackMessage.textContent = "";
+  feedbackMessage.removeAttribute("data-state");
+  feedbackDialog.showModal();
+  requestAnimationFrame(() => byId("feedback-title").focus());
+});
+byId("feedback-close").addEventListener("click", () => feedbackDialog.close());
+feedbackDialog.addEventListener("click", (event) => {
+  if (event.target === feedbackDialog) feedbackDialog.close();
+});
+feedbackForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  feedbackMessage.textContent = "";
+  feedbackMessage.removeAttribute("data-state");
+  feedbackSubmit.disabled = true;
+  feedbackSubmit.classList.add("loading");
+  feedbackSubmit.querySelector("span").textContent = "Sending feedback";
+
+  const formData = new FormData(feedbackForm);
+  const payload = {
+    ticket_type: formData.get("ticket_type"),
+    title: formData.get("title"),
+    description: formData.get("description"),
+    page_url: window.location.href,
+    selected_model: modelInput.value || null,
+    viewport: `${window.innerWidth}x${window.innerHeight}`,
+  };
+
+  try {
+    const response = await fetch("/api/feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.detail || "Feedback could not be sent");
+    feedbackMessage.dataset.state = "success";
+    feedbackMessage.textContent = "Feedback sent. Thank you!";
+    feedbackForm.reset();
+    window.setTimeout(() => feedbackDialog.close(), 900);
+  } catch (error) {
+    feedbackMessage.textContent = error.message;
+  } finally {
+    feedbackSubmit.disabled = false;
+    feedbackSubmit.classList.remove("loading");
+    feedbackSubmit.querySelector("span").textContent = "Send feedback";
+  }
+});
+
 const dialog = byId("help-dialog");
 byId("help-open").addEventListener("click", () => dialog.showModal());
 ["help-close", "help-done"].forEach((id) => byId(id).addEventListener("click", () => dialog.close()));

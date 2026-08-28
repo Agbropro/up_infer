@@ -14,6 +14,17 @@ cd /opt/personal/up_infer
 
 Open <http://127.0.0.1:8000>. API documentation is at <http://127.0.0.1:8000/docs>.
 
+## Configure feedback
+
+The ticket button in the top-right header forwards feedback to the centralized ticket service through the UP Infer backend. Configure the server environment before starting the app:
+
+```bash
+export TICKET_SERVICE_URL="https://ticket.agbropro.my.id"
+export TICKET_SERVICE_API_KEY="your-central-ingestion-api-key"
+```
+
+The API key stays on the server and is never sent to the browser. Widget choices are mapped to the central categories as follows: `misc` to `general`, `bug` to `bug`, and `feature` to `feedback`. The original choice remains available as `metadata.feedback_type`.
+
 ## Configure the server
 
 Edit the `server` section in `config/config.yaml`:

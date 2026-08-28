@@ -8,4 +8,8 @@ uploads/
 .venv
 *.log
 
+.env
+.env.*
+!.env.example
+
 config/config.yaml

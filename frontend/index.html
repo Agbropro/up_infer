@@ -14,7 +14,12 @@
       <img class="brand-logo" src="/static/assets/nicholas.png" alt="">
       <span><strong>UP Infer</strong><small>Upload &amp; infer images</small></span>
     </a>
-    <span class="status"><i></i> Ready for a school of images</span>
+    <div class="topbar-actions">
+      <span class="status"><i></i> Ready for a school of images</span>
+      <button id="feedback-open" class="feedback-open" type="button" aria-label="Send feedback">
+        <img src="/static/assets/ticket.png" alt="" aria-hidden="true">
+      </button>
+    </div>
   </header>
 
   <main>
@@ -119,6 +124,44 @@
     <button id="image-close" class="dialog-close" type="button" aria-label="Close image preview">×</button>
     <img id="zoomed-image" src="" alt="">
     <p id="image-caption"></p>
+  </dialog>
+
+  <dialog id="feedback-dialog" class="feedback-dialog">
+    <button id="feedback-close" class="dialog-close" type="button" aria-label="Close feedback form">×</button>
+    <p class="eyebrow">HELP US IMPROVE</p>
+    <h2>Send feedback</h2>
+    <p class="feedback-intro">Report an issue or suggest something useful. It goes directly to the project inbox.</p>
+    <form id="feedback-form" class="feedback-form">
+      <fieldset>
+        <legend>Type</legend>
+        <div class="feedback-types">
+          <label class="feedback-type">
+            <input class="visually-hidden" type="radio" name="ticket_type" value="misc" checked>
+            <span>Misc</span>
+          </label>
+          <label class="feedback-type">
+            <input class="visually-hidden" type="radio" name="ticket_type" value="bug">
+            <span>Bug</span>
+          </label>
+          <label class="feedback-type">
+            <input class="visually-hidden" type="radio" name="ticket_type" value="feature">
+            <span>Feature</span>
+          </label>
+        </div>
+      </fieldset>
+      <label class="feedback-field" for="feedback-title">
+        <span>Title</span>
+        <input id="feedback-title" name="title" type="text" minlength="3" maxlength="160" placeholder="What happened?" required>
+      </label>
+      <label class="feedback-field" for="feedback-description">
+        <span>Description</span>
+        <textarea id="feedback-description" name="description" minlength="3" maxlength="10000" rows="5" placeholder="Add the details that would help us understand it." required></textarea>
+      </label>
+      <button id="feedback-submit" class="run-button feedback-submit" type="submit">
+        <span>Send feedback</span><b aria-hidden="true">→</b>
+      </button>
+      <p id="feedback-message" class="feedback-message" role="status" aria-live="polite"></p>
+    </form>
   </dialog>
 
   <script src="/static/app.js" defer></script>

@@ -17,6 +17,7 @@ home_page = (FRONTEND_DIR / "index.html").read_text(encoding="utf-8")
 style_sheet = (FRONTEND_DIR / "styles.css").read_text(encoding="utf-8")
 browser_code = (FRONTEND_DIR / "app.js").read_text(encoding="utf-8")
 logo_image = (FRONTEND_DIR / "assets" / "nicholas.png").read_bytes()
+ticket_image = (ROOT_DIR / "ticket.png").read_bytes()
 
 
 @app.get("/", include_in_schema=False)
@@ -45,6 +46,13 @@ async def show_logo() -> Response:
     """Serve the UP Infer logo."""
 
     return Response(logo_image, media_type="image/png")
+
+
+@app.get("/static/assets/ticket.png", include_in_schema=False)
+async def show_ticket_icon() -> Response:
+    """Serve the custom feedback button artwork."""
+
+    return Response(ticket_image, media_type="image/png")
 
 
 @app.get("/health", include_in_schema=False)
