@@ -3,8 +3,8 @@ app:
 
 server:
   # Use 127.0.0.1 for local access or 0.0.0.0 for network/domain access.
-  domain: 127.0.0.1
-  port: 8000
+  domain: 0.0.0.0
+  port: 7000
   reload: true
 
 # Paths may be absolute, project-relative, or an Ultralytics model name.
@@ -16,9 +16,12 @@ models:
   - id: yolo11n-seg
     name: YOLO 11 Nano Segmentation
     path: yolo11n-seg.pt
-  - id: parkir 
-    name: parkir
-    path: /opt/model/plat_kendaraan_1_2_1.pt
+  - id: parkir_1_3_0
+    name: parkir 1.3.0
+    path: /mnt/secondary/tools/lpr-nba-tools/hasil_train_8jule/train/weights/best.pt
+  - id: parkir_1_2_0
+    name: parkir 1.2.0 
+    path: /mnt/secondary/lpr-nba/models/plat_kendaraan/plat_kendaraan_1_2_0.pt
 
 upload:
   max_files: 20

@@ -4,3 +4,8 @@ __pycache__/
 .ruff_cache/
 *.pt
 uploads/
+
+.venv
+*.log
+
+config/config.yaml
