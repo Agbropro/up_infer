@@ -14,7 +14,7 @@ cd /opt/personal/up_infer
 
 Open <http://127.0.0.1:8000>. API documentation is at <http://127.0.0.1:8000/docs>.
 
-## Configure feedback
+## Configure feedback (For Owner Only)
 
 The ticket button in the top-right header forwards feedback to the centralized ticket service through the UP Infer backend. Copy the example file and add the real ingestion API key before starting the app:
 
